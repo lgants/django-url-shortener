@@ -5,8 +5,12 @@ from django.views import View
 from .models import KirrURL
 
 # Create your views here.
-def test_view(request):
-    return HttpResponse("test")
+# def test_view(request):
+#     return HttpResponse("test")
+
+class HomeView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, "shortener/home.html", {})
 
 # function-based view
 def kirr_redirect_view(request, shortcode=None, *args, **kwargs):

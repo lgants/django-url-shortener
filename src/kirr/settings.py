@@ -63,10 +63,11 @@ ROOT_HOSTCONF = 'kirr.hosts'
 DEFAULT_HOST = 'www'
 DEFAULT_REDIRECT_URL = "http://www.tirr.com:8000"
 
+# NOTE by default django will look for a templates folder within each app; can override default to use a single templates folder at root (i.e. src directory) by setting key 'DIRS' value to [os.path.join(BASE_DIR, "templates")]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, "templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
