@@ -2,15 +2,38 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.views import View
 
+from .forms import SubmitUrlForm
 from .models import KirrURL
 
 # Create your views here.
 # def test_view(request):
 #     return HttpResponse("test")
 
+
+def home_view_fbv(request, *args, **kwargs):
+    if request.method == "POST":
+        print(request.POST)
+    return render(request, "shortener/home.html", {})
+
 class HomeView(View):
     def get(self, request, *args, **kwargs):
-        return render(request, "shortener/home.html", {})
+        the_form = SubmitUrlForm()
+        context = {
+            "title": "Kirr.co",
+            "form": the_form
+        }
+        return render(request, "shortener/home.html", context)
+
+    def post(self, request, *args, **kwargs):
+        form = SubmitUrlForm(request.POST)
+        if form.is_valid():
+            print(form.cleaned_data.get("url"))
+        context = {
+            "title": "Kirr.co",
+            "form": form
+        }
+
+        return render(request, "shortener/home.html", context)
 
 # function-based view
 def kirr_redirect_view(request, shortcode=None, *args, **kwargs):

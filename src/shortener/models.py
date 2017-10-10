@@ -1,8 +1,10 @@
+from django.conf import settings
 from django.db import models
 
 # Create your models here.
-from django.conf import settings
 from .utils import code_generator, create_shortcode
+from .validators import validate_url, validate_dot_com
+
 
 # looks for settings attribute, if not present defaults to 15
 SHORTCODE_MAX = getattr(settings, "SHORTCODE_MAX", 15)
@@ -30,7 +32,7 @@ class KirrURLManager(models.Manager):
         return "new codes made: {i}".format(i=new_codes)
 
 class KirrURL(models.Model):
-    url = models.CharField(max_length=220, )
+    url = models.CharField(max_length=220, validators=[validate_url, validate_dot_com])
     shortcode = models.CharField(max_length=SHORTCODE_MAX, unique=True, blank=True)
     timestamp = models.DateTimeField(auto_now=True) # when model last updated
     timestamp = models.DateTimeField(auto_now_add=True) # when model was created
