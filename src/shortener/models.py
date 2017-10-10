@@ -11,8 +11,13 @@ class KirrURLManager(models.Manager):
         qs = qs_main.filter(active=True)
         return qs
 
-    def refresh_shortcodes(self):
+    def refresh_shortcodes(self, items=100):
         qs = KirrURL.objects.filter(id__gte=1)
+        if items is not None and isinstance(items, int):
+            # reverses query set based on reversed order of ids
+            # takes up to the last X items
+            qs = qs.order_by('-id')[:items]
+
         new_codes = 0
         for q in qs:
             q.shortcode = create_shortcode(q)
