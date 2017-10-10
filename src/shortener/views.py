@@ -1,6 +1,8 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.views import View
+
+from analytics.models import ClickEvent
 
 from .forms import SubmitUrlForm
 from .models import KirrURL
@@ -26,14 +28,25 @@ class HomeView(View):
 
     def post(self, request, *args, **kwargs):
         form = SubmitUrlForm(request.POST)
-        if form.is_valid():
-            print(form.cleaned_data.get("url"))
         context = {
             "title": "Kirr.co",
             "form": form
         }
 
-        return render(request, "shortener/home.html", context)
+        template = "shortener/home.html"
+        if form.is_valid():
+            new_url = form.cleaned_data.get("url")
+            obj, created = KirrURL.objects.get_or_create(new_url)
+            context = {
+                "object": obj,
+                "created": created,
+            }
+            if created:
+                template = "shortener/success.html"
+            else:
+                template = "shortener/already-exists.html"
+
+        return render(request, template, context)
 
 # function-based view
 def kirr_redirect_view(request, shortcode=None, *args, **kwargs):
@@ -56,9 +69,14 @@ def kirr_redirect_view(request, shortcode=None, *args, **kwargs):
 
 
 # class-based view
-class KirrCBView(View):
+class URLRedirectView(View):
     # class-based views must explicitly handle http methods whereas function-based view handles everything automatically and method can be accessed with request.method
     def get(self, request, shortcode=None, *args, **kwargs):
-        obj = get_object_or_404(KirrURL, shortcode=shortcode)
+        qs = KirrURL.objects.filter(shortcode__iexact=shortcode)
+        # obj = get_object_or_404(KirrURL, shortcode__iexact=shortcode)
         # return HttpResponse("hello again {sc}".format(sc=shortcode))
+        if qs.cont() != 1 and not qs.exists():
+            raise Http404
+        obj = qs.first()
+        print(ClickEvent.objects.create_event(obj))
         return HttpResponseRedirect(obj.url)

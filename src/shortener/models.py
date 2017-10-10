@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 
+# from django.core.urlresolvers import reverse
+from django_hosts.resolvers import reverse
 # Create your models here.
 from .utils import code_generator, create_shortcode
 from .validators import validate_url, validate_dot_com
@@ -57,6 +59,11 @@ class KirrURL(models.Model):
 
     def __unicode__(self):
         return str(self.url)
+
+    def short_url(self):
+        url_path = reverse("scode", kwargs={"shortcode": self.shortcode}, host="www", scheme="http")
+        return url_path
+        # return "http://www.tirr.com/{shortcode}".format(shortcode=self.shortcode)
 
 '''
 NOTE run these commands whenever touching models.py:
